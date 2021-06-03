@@ -1,12 +1,25 @@
+# @Reference: http://www.babyitellyou.com/details?id=606bfba80a6c642cafe25b02
+# @Modifier: Casio3
+
 import asyncio
+import time
+from random import choice
+
+import requests
+from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
 from pyppeteer import launch
 from pyppeteer_stealth import stealth
-from fake_useragent import UserAgent
-from bs4 import BeautifulSoup
-import re
-import time
 
-url = "https://www.wjx.top/vj/twI3Q7E.aspx"
+# TODO(1-halfway): Repeat simple get request until the questionnaire is open, then go to main run function.
+# TODO(2): Profile Class to collect a student information, aiming at multi-autofill
+# TODO(3): Click radio button, due to complex options, now i use random choice
+
+
+url = "https://www.wjx.cn/jq/99620028.aspx" # Radio button passed
+# url = "https://www.wjx.cn/jq/93605088.aspx"
+# url = "https://www.wjx.cn/jq/96430564.aspx" # Successful example, only text forms
+# url = "https://www.wjx.top/vj/twI3Q7E.aspx" # Aborted, contains multi-select button
 
 name = "田所浩二"
 student_id = "2020114514180"
@@ -58,32 +71,62 @@ async def run():
         if '电话' in item or '手机' in item:
             da_phone_number = 'q' + item['id'][-1]
 
-    fit = '[name="{}"]'
+    text = '[name="{}"]'
+
+    ran_radio = soup.find(class_='ulradiocheck')
+
+    alt = []
+
+    for item in ran_radio:
+        i = item.find('label')
+        if i:
+            alt.append(i.get('for'))
+    radio = 'a[rel="{}"]'
 
     try:
-        await page.type(fit.format(da_name), name)
-    except:
+        await page.type(text.format(da_name), name)
+    except Exception as e:
         print("'姓名' Missed...")
-
     try:
-        await page.type(fit.format(da_student_id), student_id)
-    except:
+        await page.type(text.format(da_student_id), student_id)
+    except Exception as e:
         print("'学号' Missed...")
     try:
-        await page.type(fit.format(da_college), college)
-    except:
+        await page.type(text.format(da_college), college)
+    except Exception as e:
         print("'学院' Missed...")
     try:
-        await page.type(fit.format(da_phone_number), phone_number)
-    except:
+        await page.type(text.format(da_phone_number), phone_number)
+    except Exception as e:
         print("'电话' Missed...")
+
+# some unknown things...click twice is better.
+    try:
+        await page.click(radio.format(choice(alt)))
+        await page.click(radio.format(choice(alt)))
+    except Exception as e:
+        print("jqRadio Missed.")
 
     try:
         await page.click('#submit_button')
-    except:
-        print("提交出错.")
+        pass
+    except Exception as e:
+        await page.click('#submit_button')
+        print('Catch Exception when submitting:',e)
 
     time.sleep(20)
 
-
 asyncio.get_event_loop().run_until_complete(run())
+
+"""
+For Racing.
+flag = False
+
+while True:
+    if flag:
+        asyncio.get_event_loop().run_until_complete(run())
+        break
+    res = requests.get(url)
+    if False:
+        flag = True
+"""
