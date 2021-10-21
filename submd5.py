@@ -10,6 +10,8 @@ wordlist = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 def md5(text):
     return hashlib.md5(str(text).encode('utf-8')).hexdigest()
+def sha256(text):
+    return hashlib.sha256(str(text).encode('utf-8')).hexdigest()
 
 def generator(n,wordlist):
     dicts = its.product(wordlist, repeat=n)

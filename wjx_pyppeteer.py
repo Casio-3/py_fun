@@ -15,7 +15,6 @@ from pyppeteer_stealth import stealth
 # TODO(2): Profile Class to collect a student information, aiming at multi-autofill
 # TODO(3): Click radio button, due to complex options, now i use random choice
 
-
 url = "https://www.wjx.cn/jq/99620028.aspx" # Radio button passed
 # url = "https://www.wjx.cn/jq/93605088.aspx"
 # url = "https://www.wjx.cn/jq/96430564.aspx" # Successful example, only text forms
@@ -77,11 +76,12 @@ async def run():
 
     alt = []
 
-    for item in ran_radio:
-        i = item.find('label')
-        if i:
-            alt.append(i.get('for'))
-    radio = 'a[rel="{}"]'
+    if ran_radio is not None:
+        for item in ran_radio:
+            i = item.find('label')
+            if i:
+                alt.append(i.get('for'))
+        radio = 'a[rel="{}"]'
 
     try:
         await page.type(text.format(da_name), name)
@@ -114,7 +114,7 @@ async def run():
         await page.click('#submit_button')
         print('Catch Exception when submitting:',e)
 
-    time.sleep(20)
+    time.sleep(10)
 
 asyncio.get_event_loop().run_until_complete(run())
 
